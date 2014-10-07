@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+import argparse
+import sys
+import os
+sys.path.append(os.getenv("ALICE_HOME"))
+import subprocess
+import pickle
+import alicedefaultexplorer
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--checker', required = True, help = 'Location of the checker')
+parser.add_argument('--traces_dir', required = True, help = 'Location of the traces directory')
+parser.add_argument('--threads', default = 4)
+parser.add_argument('--debug_level', default = 0, choices = range(0, 3))
+parser.add_argument('--ignore_mmap', type = bool, default = False)
+
+args = parser.parse_args()
+args.checker = os.path.abspath(args.checker)
+args.traces_dir = os.path.abspath(args.traces_dir)
+
+f = open(os.path.join(args.traces_dir, "config"), "r")
+config = pickle.load(f)
+f.close()
+
+
+#### HACK - MADTHANU - REMOVE
+os.system("rm -rf /run/shm/alice-*")
+
+def try_mkdir(name):
+	try:
+		os.system("rm -rf " + name)
+		os.mkdir(name)
+		return True
+	except OSError as e:
+		return False
+
+alice_config = dict()
+alice_config['strace_file_prefix'] = os.path.join(args.traces_dir, "strace.out")
+alice_config['initial_snapshot'] = os.path.join(args.traces_dir, "initial_snapshot")
+alice_config['base_path'] = config['workload_dir']
+alice_config['starting_cwd'] = config['starting_wd']
+alice_config['checker_tool'] = args.checker
+alice_config['debug_level'] = args.debug_level
+alice_config['ignore_mmap'] = args.ignore_mmap
+
+folders = ['/run/shm/', '/dev/shm/', '/tmp', None]
+for folder in folders:
+	assert(folder != None)
+	folder = os.path.join(folder, 'alice-' + str(os.getpid()))
+	if try_mkdir(folder):
+		alice_config['scratchpad_dir'] = folder
+		break
+
+alicedefaultexplorer.default_checks(alice_config, threads = args.threads)
+#### HACK - MADTHANU - INSERT
+#os.system("rm -rf " + alice_config['scratchpad_dir'])
+

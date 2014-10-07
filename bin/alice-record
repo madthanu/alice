@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+import argparse
+import sys
+import os
+import subprocess
+import pickle
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--workload_dir', required = True)
+parser.add_argument('--traces_dir', required = True)
+parser.add_argument('--verbose', action='store_true')
+parser.add_argument('remainder', nargs = argparse.REMAINDER)
+
+args = parser.parse_args()
+args.workload_dir = os.path.abspath(args.workload_dir)
+args.traces_dir = os.path.abspath(args.traces_dir)
+
+if args.verbose:
+	print 'Taking initial snapshot'
+subprocess.check_output("cp -R " + args.workload_dir + " " + os.path.join(args.traces_dir, "initial_snapshot"), shell = True)
+
+if args.verbose:
+	print 'Running workload with strace'
+workload_strace_command = "alice-strace -k -s 0 -ff -tt -o".split(' ') + [os.path.join(args.traces_dir, "strace.out")] + args.remainder
+subprocess.call(workload_strace_command)
+
+if args.verbose:
+	print 'Recording symbol information'
+subprocess.check_output("alice-strace-retrieve-symbols " + os.path.join(args.traces_dir, "strace.out"), shell = True)
+
+if args.verbose:
+	print 'Recording config information'
+f = open(os.path.join(args.traces_dir, "config"), "w")
+output = dict()
+output['starting_wd'] = os.getcwd()
+output['workload_dir'] = args.workload_dir
+pickle.dump(output, f, protocol = 0)
+f.close()

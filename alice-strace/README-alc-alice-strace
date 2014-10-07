@@ -1,0 +1,8 @@
+The current version differs from normal strace by the following:
+
+1. With writev and pwritev system calls, the strace shows an additional parameter for the calls (as the last parameter). This parameter describes the total size (in bytes) of the iov buffers involved in the call.
+
+2. In addition to the usual output files, this version of strace creates "dump output files". If no '-ff' is given, the dump file is "/tmp/strace_dump". Otherwise, it is <user given prefix>.byte_dump.<pid or tid>.
+
+3. For the write and pwrite calls, whenever the calls happen, the actual data contained in the *buf parameter of the calls is written to the dump file. The size of the data written is that of the parameter in the write() or pwrite() calls (specifically, it is NOT the return value of the calls). For writev and pwritev calls, the data contained in each iov is written to the dump file (in order).
+
