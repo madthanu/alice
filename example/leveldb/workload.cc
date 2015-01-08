@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
 	 * corresponding to 4, 5, 6, 7, 8, and 9. Only the last Put (corresponding to 9) is
 	 * done synchronously. */
 	for(i = 4; i < 10; i++) {
-		key = string(gen_string(i, 5000));
-		value = string(gen_string(i, 40000));
+		key = string(gen_string(i, KEY_SIZE));
+		value = string(gen_string(i, VALUE_SIZE));
 
 		if(i == 9) {
 			write_options.sync = true;

@@ -50,16 +50,16 @@ int main(int argc, char *argv[]) {
 	options.paranoid_checks = true;
 	read_options.verify_checksums = true;
 
-	/* Getting all the messages printed to the terminal at the time of the emulated
+	/* Getting all the messages printed to the terminal at the time of the simulated
 	 * crash. This will be useful when we are checking for durability. The second
 	 * command line argument to this checker is the path to a file containing the
-	 * terminal output at the time of the emulated crash.  */
+	 * terminal output at the time of the simulated crash.  */
 	readall(argv[2], printed_messages);
 
 	/* Opening the database. The first command line argument to this checker is the
 	 * path to a folder that contains the state of the workload directory after the
-	 * file system recovers from the emulated crash (i.e., if the argument is
-	 * "/tmp/foo", then if the exact emulated crash had actually happened, we will
+	 * file system recovers from the simulated crash (i.e., if the argument is
+	 * "/tmp/foo", then if the exact simulated crash had actually happened, we will
 	 * find all files within "workload_dir" to be in the same state as they are now
 	 * in "/tmp/foo"). Therefore, the database that we are supposed to check, is
 	 * "<first command line argument>/testdb" (corresponding to
@@ -91,8 +91,8 @@ int main(int argc, char *argv[]) {
 		int row_number = it->key().ToString().c_str()[0] - 'a';
 		assert(row_number >= 0 && row_number < 10);
 
-		key = string(gen_string(row_number, 5000));
-		value = string(gen_string(row_number, 40000));
+		key = string(gen_string(row_number, KEY_SIZE));
+		value = string(gen_string(row_number, VALUE_SIZE));
 		assert(key == it->key().ToString());
 		assert(value == it->value().ToString());
 

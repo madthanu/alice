@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
 	/* Put four rows into the database. Their keys and values are each strings
 	 * corresponding to 0, 1, 2, and 3. All Puts are done synchronously. */
 	for(i = 0; i < 4; i++) {
-		key = string(gen_string(i, 5000));
-		value = string(gen_string(i, 40000));
+		key = string(gen_string(i, KEY_SIZE));
+		value = string(gen_string(i, VALUE_SIZE));
 
 		ret = db->Put(write_options, key, value);
 		assert(ret.ok());
