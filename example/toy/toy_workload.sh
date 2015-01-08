@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+trap 'error ${LINENO}' ERR
 
 # The workload directory is where the files of the application will be stored.
 # The application, as it runs, will modify the workload directory and its

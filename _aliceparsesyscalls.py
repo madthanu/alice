@@ -934,6 +934,10 @@ def get_micro_ops():
 			print '----------------------------------------------------'
 			for op in micro_operations:
 				print op
+			print '----------------------------------------------------'
+			print aliceconfig()
+			print '----------------------------------------------------'
+			os.system("ls -lR " + aliceconfig().scratchpad_dir)
 			exit()
 
 	return (path_inode_map, micro_operations)

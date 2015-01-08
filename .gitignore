@@ -1,0 +1,5 @@
+*.pyc
+*.swp
+example/toy/a.out
+example/toy/traces_dir/
+example/toy/workload_dir/
