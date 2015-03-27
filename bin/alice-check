@@ -37,8 +37,8 @@ __license__ = "MIT"
 parser = argparse.ArgumentParser()
 parser.add_argument('--checker', required = True, help = 'Location of the checker')
 parser.add_argument('--traces_dir', required = True, help = 'Location of the traces directory')
-parser.add_argument('--threads', default = 4)
-parser.add_argument('--debug_level', default = 0, choices = range(0, 3))
+parser.add_argument('--threads', type = int, default = 4)
+parser.add_argument('--debug_level', type = int, default = 0, choices = range(0, 3))
 parser.add_argument('--ignore_mmap', type = bool, default = False)
 
 args = parser.parse_args()
