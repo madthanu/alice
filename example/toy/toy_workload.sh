@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+trap 'error ${LINENO}' ERR
 
 # The workload directory is where the files of the application will be stored.
 # The application, as it runs, will modify the workload directory and its
@@ -6,14 +8,14 @@
 # link2, are placed. We create the workload directory and initialize it with
 # file1 containing "hello".
 rm -rf workload_dir
-mkdir -p workload_dir
+mkdir workload_dir
 echo -n "hello" > workload_dir/file1
 
 
 # The traces directory is for storing the (multiple) traces that are recorded
 # as the application is run.
 rm -rf traces_dir
-mkdir -p traces_dir
+mkdir traces_dir
 
 # Compiling the toy application.
 gcc -g -fPIC toy.c
