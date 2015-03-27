@@ -205,6 +205,11 @@ class defaultfs:
 				count = line.count
 			disk_op = Struct(op = 'sync', inode = line.inode, offset = offset, count = count)
 			line.hidden_disk_ops.append(disk_op)
+		elif line.op in ['sync']:
+			line.hidden_disk_ops = []
+			for f in line.hidden_files:
+				disk_op = Struct(op = 'sync', inode = f.inode, offset = 0, count = f.size)
+				line.hidden_disk_ops.append(disk_op)
 		elif line.op == 'stdout':
 			line.hidden_disk_ops = [Struct(op = line.op, data = line.data)]
 		else:
@@ -237,7 +242,7 @@ class defaultfs:
 					elif ops[j].op == 'truncate':
 						if not ops[j].inode == ops[i].inode:
 							continue
-						assert ops[i].hidden_micro_op.hidden_parsed_line.syscall in ['fsync', 'fdatasync']
+						assert ops[i].hidden_micro_op.hidden_parsed_line.syscall in ['fsync', 'fdatasync', 'sync']
 						ops[i].hidden_dependencies.add(j)
 						ops[j].hidden_twojournalfs_stuff.reverse_fsync_dependencies.add(i)
 					elif ops[j].op == 'write':
@@ -265,7 +270,7 @@ class defaultfs:
 					elif ops[j].op in ['create_dir_entry', 'delete_dir_entry']:
 						if not ops[j].parent == ops[i].inode:
 							continue
-						assert ops[i].hidden_micro_op.hidden_parsed_line.syscall == 'fsync'
+						assert ops[i].hidden_micro_op.hidden_parsed_line.syscall in ['fsync', 'sync']
 						ops[i].hidden_dependencies.add(j)
 						ops[j].hidden_twojournalfs_stuff.reverse_fsync_dependencies.add(i)
 					else:

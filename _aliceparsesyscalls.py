@@ -87,7 +87,7 @@ equivalent_syscall['pwrite64'] = 'pwrite'
 equivalent_syscall['_llseek'] = 'lseek'
 equivalent_syscall['ftruncate64'] = 'ftruncate'
 
-sync_ops = set(['fsync', 'fdatasync', 'file_sync_range'])
+sync_ops = set(['fsync', 'fdatasync', 'file_sync_range', 'sync'])
 expansive_ops = set(['append', 'trunc', 'write', 'unlink', 'rename'])
 pseudo_ops = sync_ops | set(['stdout'])
 real_ops = expansive_ops | set(['creat', 'link', 'mkdir', 'rmdir'])
@@ -272,8 +272,12 @@ def __replayed_truncate(path, new_size):
 	os.close(tmp_fd)
 	writeable_toggle(replayed_path(path), old_mode)
 
-def __get_files_from_inode(inode):
-	results = subprocess.check_output(['find', aliceconfig().scratchpad_dir, '-inum', str(inode)])
+def __get_files_from_inode(inode, all_files = False):
+	if not all_files:
+		results = subprocess.check_output(['find', aliceconfig().scratchpad_dir, '-inum', str(inode)])
+	else:
+		assert inode == 0
+		results = subprocess.check_output(['find', aliceconfig().scratchpad_dir])
 	toret = []
 	for path in results.split('\n'):
 		if path != '':
@@ -283,7 +287,8 @@ def __get_files_from_inode(inode):
 			path = re.sub(r'//', r'/', path)
 
 			assert __replayed_stat(path)
-			assert __replayed_stat(path).st_ino == inode
+			if not all_files:
+				assert __replayed_stat(path).st_ino == inode
 			toret.append(path)
 	return toret
 
@@ -654,6 +659,13 @@ def __get_micro_op(syscall_tid, line, stackinfo, mtrace_recorded):
 			assert len(files) > 0
 			size = __replayed_stat(files[0]).st_size
 			micro_operations.append(Struct(op = parsed_line.syscall, name = name, inode = inode, size = size))
+	elif parsed_line.syscall in ['sync']:
+		synced_files = []
+		for name in __get_files_from_inode(0, all_files = True):
+			inode = __replayed_stat(name).st_ino
+			size = __replayed_stat(name).st_size
+			synced_files.append(Struct(name = name, inode = inode, size = size))
+		micro_operations.append(Struct(op = parsed_line.syscall, hidden_files = synced_files))
 	elif parsed_line.syscall == 'mkdir':
 		if int(parsed_line.ret) != -1:
 			name = proctracker.original_path(eval(parsed_line.args[0]))

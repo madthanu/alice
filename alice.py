@@ -272,12 +272,19 @@ class Replayer:
 		assert self.fs_initialized
 		diskops_index = 0
 		included_diskops = []
+		# TODO: Shameless hack to not look into the atomicity of sync
+		micro_op = self.micro_ops[self.__micro_end]
+		if micro_op.op == 'sync' and self.__disk_end < len(micro_op.hidden_disk_ops) - 1:
+			return False
 		for i in range(0, self.__micro_end + 1):
 			micro_op = self.micro_ops[i]
 			till = self.__disk_end + 1 if self.__micro_end == i else len(micro_op.hidden_disk_ops)
 			for j in range(0, till):
 				if not micro_op.hidden_disk_ops[j].hidden_omitted:
 					included_diskops.append(diskops_index)
+				elif micro_op.op == 'sync':
+					# TODO: Shameless hack to not look into the atomicity of sync
+					return False
 				diskops_index += 1
 		return self.test_suite.test_combo_validity(included_diskops)
 	def __init__(self, alice_args):
