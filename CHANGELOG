@@ -1,0 +1,6 @@
+Version 0.0.2
+-------------
+
+* Bug fixes, more support for running in a 32-bit machine
+* Adding LevelDB example
+* Supporting the following system calls: sync, pwrite64, ftruncate64, _llseek, fstatat, newfstatat
