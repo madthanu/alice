@@ -79,6 +79,14 @@ innocent_syscalls = ["_exit","pread","_newselect","_sysctl","accept","accept4","
 
 innocent_syscalls += ['mtrace_mmap', 'mtrace_munmap', 'mtrace_thread_start']
 
+# Some system calls have special 64-bit versions. The 64-bit versions
+# are not inherently different from the original versions, and strace
+# automatically converts their representation to look like the original.
+equivalent_syscall = {}
+equivalent_syscall['pwrite64'] = 'pwrite'
+equivalent_syscall['_llseek'] = 'lseek'
+equivalent_syscall['ftruncate64'] = 'ftruncate'
+
 sync_ops = set(['fsync', 'fdatasync', 'file_sync_range'])
 expansive_ops = set(['append', 'trunc', 'write', 'unlink', 'rename'])
 pseudo_ops = sync_ops | set(['stdout'])
@@ -897,6 +905,11 @@ def get_micro_ops():
 		for line in f:
 			parsed_line = parse_line(line)
 			if parsed_line:
+				# Replace any system calls that have a 32-bit
+				# equivalent with the equivalent
+				if parsed_line.syscall in equivalent_syscall:
+					parsed_line.syscall = equivalent_syscall[parsed_line.syscall]
+				# On a write, take care of the offset within the dump file 
 				if parsed_line.syscall in ['write', 'writev', 'pwrite', 'pwritev', 'mwrite']:
 					if parsed_line.syscall == 'pwrite':
 						write_size = safe_string_to_int(parsed_line.args[-2])
