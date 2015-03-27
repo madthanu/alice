@@ -69,7 +69,7 @@ def replay_disk_ops(initial_paths_inode_map, rows, replay_dir, stdout_file, use_
 			return False
 
 	def get_inode_file(inode, mode = None):
-		assert type(inode) == int
+		assert isinstance(inode, (int, long))
 		if not get_stat(replay_dir + '/.inodes/' + str(inode)):
 			if mode == None:
 				mode = 0666
@@ -82,7 +82,7 @@ def replay_disk_ops(initial_paths_inode_map, rows, replay_dir, stdout_file, use_
 
 	dirinode_map = {} # From initial_inode to replayed_directory_path
 	def is_linked_inode_directory(inode):
-		assert type(inode) == int
+		assert isinstance(inode, (int, long))
 		if inode not in dirinode_map:
 			return False
 		if dirinode_map[inode] == replay_dir + '/.inodes/' + str(inode):
@@ -90,7 +90,7 @@ def replay_disk_ops(initial_paths_inode_map, rows, replay_dir, stdout_file, use_
 		return True
 
 	def get_inode_directory(inode, mode = None):
-		assert type(inode) == int
+		assert isinstance(inode, (int, long))
 		if inode not in dirinode_map:
 			if mode == None:
 				mode = 0777
@@ -101,7 +101,7 @@ def replay_disk_ops(initial_paths_inode_map, rows, replay_dir, stdout_file, use_
 		return dirinode_map[inode]
 
 	def set_inode_directory(inode, dir_path):
-		assert type(inode) == int
+		assert isinstance(inode, (int, long))
 		dirinode_map[inode] = dir_path
 
 	def initialize_inode_links(initial_paths_inode_map):
@@ -334,7 +334,7 @@ class Replayer:
 			for j in range(0, till):
 				if not micro_op.hidden_disk_ops[j].hidden_omitted:
 					to_replay.append(micro_op.hidden_disk_ops[j])
-		replay_disk_ops(self.path_inode_map, to_replay, dirname, stdout_file, use_cached = True)
+                replay_disk_ops(self.path_inode_map, to_replay, dirname, stdout_file, use_cached = False)
 	def get_op(self, i):
 		assert i <= len(self.micro_ops)
 		return copy.deepcopy(self.micro_ops[i])
