@@ -45,13 +45,14 @@ class MultiThreadedChecker(threading.Thread):
 	queue = Queue.Queue()
 	outputs = {}
 	
-	def __init__(self, queue):
+	def __init__(self, queue, thread_id='0'):
 		threading.Thread.__init__(self)
 		self.queue = MultiThreadedChecker.queue
+		self.thread_id = str(thread_id)
 
 	def __threaded_check(self, dirname, crashid):
 		assert type(aliceconfig().checker_tool) in [list, str, tuple]
-		args = [aliceconfig().checker_tool, dirname, dirname + '.input_stdout']
+		args = [aliceconfig().checker_tool, dirname, dirname + '.input_stdout', self.thread_id]
 		output_stdout = dirname + '.output_stdout'
 		output_stderr = dirname + '.output_stderr'
 		retcode = subprocess.call(args, stdout = open(output_stdout, 'w'), stderr = open(output_stderr, 'w'))
@@ -116,7 +117,7 @@ def default_checks(alice_args, threads = 1):
 
 	assert threads > 0
 	for i in range(0, threads):
-		t = MultiThreadedChecker(MultiThreadedChecker.queue)
+		t = MultiThreadedChecker(MultiThreadedChecker.queue, i)
 		t.setDaemon(True)
 		t.start()
 
