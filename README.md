@@ -261,7 +261,7 @@ find vulnerabilities that can get exposed by future file systems; some
 crash scenarios that are possible with the default model do not happen
 in common current file systems. Also, ALICE’s output (a list of
 vulnerabilities) is only designed to show the number of source lines
-that require ordering or atomicity. It is thus erraneous to directly
+that require ordering or atomicity. It is thus erroneous to directly
 correlate the number of vulnerabilities shown by ALICE with current
 real-world impact.
 
